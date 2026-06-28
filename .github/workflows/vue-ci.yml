@@ -1,0 +1,49 @@
+name: Vue CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Get repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Install Node
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Install packages
+      - name: Install dependencies
+        run: npm ci
+
+      # Check code formatting
+      - name: Run Prettier check
+        run: npm run format:check
+        continue-on-error: true
+
+      # Check lint errors
+      - name: Run ESLint
+        run: npm run lint
+
+      # Build Vue application
+      - name: Build Vue
+        run: npm run build
+
+      # Build Docker image
+      - name: Build Docker image
+        run: |
+          docker build \
+          -t vuebasics .
